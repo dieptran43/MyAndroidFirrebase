@@ -1,5 +1,6 @@
 package com.androidfirebase.diep.myandroidfirrebase;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -90,7 +91,8 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if(user !=null){
             Log.d("KiemTraSuccess", user.getUid());
-            Toast.makeText(this, "Dang nhap thanh cong" +user.getEmail(), Toast.LENGTH_SHORT).show();
+            Intent iUpdateIser = new Intent(MainActivity.this, UpdateUserActivity.class);
+            startActivity(iUpdateIser);
         }
         else{
             Log.d("KiemTraOut", "Da log out roi!!");
