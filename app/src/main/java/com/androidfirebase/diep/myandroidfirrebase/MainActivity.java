@@ -1,5 +1,6 @@
 package com.androidfirebase.diep.myandroidfirrebase;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,7 +8,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,106 +30,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements ChildEventListener{
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference databaseReference;
-    AdapterUser adapterUser;
-    List<User> usersList;
-    ListView listView;
+public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
+    //FirebaseDatabase firebaseDatabase;
+   // DatabaseReference databaseReference;
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("users");
-
-        listView = (ListView) findViewById(R.id.listData);
-        usersList = new ArrayList<>();
-        adapterUser = new AdapterUser(this, R.layout.custom_listview, usersList);
-        listView.setAdapter(adapterUser);
-
-       //databaseReference.addChildEventListener(this);
-        //Query order by
-        Query query = databaseReference.orderByChild("tuoi").limitToLast(2).startAt(2);
-        query.addChildEventListener(this);
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth.createUserWithEmailAndPassword("levandiep44@gmail.com", "123456").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if(task.isSuccessful())
+                {
+                    Toast.makeText(MainActivity.this, "Chuc mung anh Diep da create thanh cong user", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
-
-
+    
     @Override
-    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        Log.d("ADD", "Da add");
-        User user = dataSnapshot.getValue(User.class);
-        usersList.add(user);
-        adapterUser.notifyDataSetChanged();
+    public  void onStart()
+    {
+        super.onStart();
+        firebaseAuth.addAuthStateListener(this);
     }
 
     @Override
-    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-        Log.d("Changed", "Da Changed");
-        //User user = dataSnapshot.getValue(User.class);
-       // String userKey = dataSnapshot.getKey();
-        //Log.d("Changed2", userKey);
-       // adapterUser.notifyDataSetChanged();
-
-        usersList.clear();
-        databaseReference.removeEventListener(this);
-        databaseReference.addChildEventListener(this);
+    public void onStop()
+    {
+        super.onStop();
+        firebaseAuth.removeAuthStateListener(this);
     }
 
     @Override
-    public void onChildRemoved(DataSnapshot dataSnapshot) {
-        Log.d("Remove", "Da remove");
-    }
-
-    @Override
-    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-        Log.d("Move", "Da move");
-    }
-
-    @Override
-    public void onCancelled(DatabaseError databaseError) {
-        Log.d("Cancel", "Da Cancel");
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if(user !=null){
+            Log.d("KiemTraSuccess", user.getUid());
+        }
+        else{
+            Log.d("KiemTraOut", "Da log out roi!!");
+        }
     }
 }
 
-class User{
-
-    String hoten;
-    boolean gioitinh;
-    Long tuoi;
-
-    public  User(){
-
-    }
-    public  User(String hoten, boolean gioitinh, Long tuoi){
-        this.hoten = hoten;
-        this.gioitinh = gioitinh;
-        this.tuoi = tuoi;
-    }
-
-    public String getHoten() {
-        return hoten;
-    }
-
-    public void setHoten(String hoten) {
-        this.hoten = hoten;
-    }
-
-    public boolean isGioitinh() {
-        return gioitinh;
-    }
-
-    public void setGioitinh(boolean gioitinh) {
-        this.gioitinh = gioitinh;
-    }
-
-    public Long getTuoi() {
-        return tuoi;
-    }
-
-    public void setTuoi(Long tuoi) {
-        this.tuoi = tuoi;
-    }
-
-}
