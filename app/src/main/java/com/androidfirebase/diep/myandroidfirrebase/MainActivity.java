@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     //FirebaseDatabase firebaseDatabase;
    // DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
+    EditText edEmail, edPassword;
+    Button btnDangNhap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,17 +44,33 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         setContentView(R.layout.activity_main);
 
         firebaseAuth = FirebaseAuth.getInstance();
-        firebaseAuth.createUserWithEmailAndPassword("levandiep44@gmail.com", "123456").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+        firebaseAuth.signOut();
+        edEmail = (EditText) findViewById(R.id.edEmail);
+        edPassword = (EditText) findViewById(R.id.edPassword);
+        btnDangNhap = (Button) findViewById(R.id.btnDangNhap);
+
+        btnDangNhap.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful())
-                {
-                    Toast.makeText(MainActivity.this, "Chuc mung anh Diep da create thanh cong user", Toast.LENGTH_SHORT).show();
-                }
+            public void onClick(View v) {
+                String email = edEmail.getText().toString();
+                String passWord = edPassword.getText().toString();
+                firebaseAuth.signInWithEmailAndPassword(email, passWord).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful())
+                        {
+                            Toast.makeText(MainActivity.this, "Dang nhap thanh cong", Toast.LENGTH_SHORT).show();
+                            Log.d("KiemTraOut", "Dang nhap thanh cong");
+                        }
+                        else{
+                            Toast.makeText(MainActivity.this, "Moi dang nhap lai", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         });
     }
-    
+
     @Override
     public  void onStart()
     {
@@ -71,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if(user !=null){
             Log.d("KiemTraSuccess", user.getUid());
+            Toast.makeText(this, "Dang nhap thanh cong" +user.getEmail(), Toast.LENGTH_SHORT).show();
         }
         else{
             Log.d("KiemTraOut", "Da log out roi!!");
